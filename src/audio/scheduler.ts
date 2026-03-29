@@ -24,7 +24,8 @@ function scheduleStep(state: SequencerState, time: number): void {
       const rate = semitones !== 0
         ? Math.pow(2, semitones / 12)
         : 1.0;
-      playSample(track.buffer, time, track.gain, rate);
+      const volume = track.volumes[currentStep];
+      playSample(track.buffer, time, track.gain, rate, volume);
     }
   }
   notesInQueue.push({ step: currentStep, time });

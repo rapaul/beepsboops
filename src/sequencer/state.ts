@@ -10,6 +10,7 @@ export interface Track {
   buffer: AudioBuffer | null;
   pattern: boolean[];
   pitches: number[];   // per-step semitone offset (melodic tracks)
+  volumes: number[];   // per-step volume 0.0–1.0 (default 1.0)
   gain: GainNode | null;
 }
 
@@ -31,6 +32,10 @@ function createEmptyPitches(): number[] {
   return new Array(16).fill(0);
 }
 
+function createDefaultVolumes(): number[] {
+  return new Array(16).fill(1);
+}
+
 export function createState(): SequencerState {
   const tracks: Track[] = TRACK_DEFS.map((def) => ({
     name: def.name,
@@ -40,6 +45,7 @@ export function createState(): SequencerState {
     buffer: null,
     pattern: createEmptyPattern(),
     pitches: createEmptyPitches(),
+    volumes: createDefaultVolumes(),
     gain: null,
   }));
 
@@ -81,6 +87,11 @@ export function setStepPitch(state: SequencerState, step: number, pitch: number)
   track.pitches[step] = pitch;
 }
 
+export function setStepVolume(state: SequencerState, step: number, volume: number): void {
+  const track = state.tracks[state.activeTrackIndex];
+  track.volumes[step] = Math.max(0, Math.min(1, volume));
+}
+
 export function getActiveTrack(state: SequencerState): Track {
   return state.tracks[state.activeTrackIndex];
 }
@@ -90,6 +101,7 @@ export function getActiveTrack(state: SequencerState): Track {
 interface SavedPattern {
   patterns: boolean[][];
   pitches: number[][];
+  volumes?: number[][];
   bpm: number;
   activeTrackIndex: number;
 }
@@ -98,6 +110,7 @@ export function saveState(state: SequencerState): void {
   const data: SavedPattern = {
     patterns: state.tracks.map((t) => [...t.pattern]),
     pitches: state.tracks.map((t) => [...t.pitches]),
+    volumes: state.tracks.map((t) => [...t.volumes]),
     bpm: state.bpm,
     activeTrackIndex: state.activeTrackIndex,
   };
@@ -115,6 +128,9 @@ export function loadSavedState(state: SequencerState): void {
         state.tracks[i].pattern = data.patterns[i];
         if (data.pitches?.[i]) {
           state.tracks[i].pitches = data.pitches[i];
+        }
+        if (data.volumes?.[i]) {
+          state.tracks[i].volumes = data.volumes[i];
         }
       }
     }
