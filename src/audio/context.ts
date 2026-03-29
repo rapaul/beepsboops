@@ -18,7 +18,12 @@ export function getMasterGain(): GainNode {
 export async function ensureAudioReady(): Promise<AudioContext> {
   const ctx = getAudioContext();
   if (ctx.state === 'suspended') {
-    await ctx.resume();
+    // resume() must be awaited inside the user-gesture callstack.
+    // Race with a timeout so headless browsers don't hang forever.
+    await Promise.race([
+      ctx.resume(),
+      new Promise((r) => setTimeout(r, 2000)),
+    ]);
   }
   // iOS Safari unlock: play a silent buffer on first interaction
   const silent = ctx.createBuffer(1, 1, ctx.sampleRate);

@@ -1,10 +1,17 @@
 import { ensureAudioReady } from '../audio/context';
 import { startScheduler, stopScheduler } from '../audio/scheduler';
 import type { SequencerState } from './state';
+import { initAudio } from './state';
+
+let audioInitialized = false;
 
 export async function play(state: SequencerState): Promise<void> {
   if (state.isPlaying) return;
   await ensureAudioReady();
+  if (!audioInitialized) {
+    await initAudio(state);
+    audioInitialized = true;
+  }
   state.isPlaying = true;
   startScheduler(state);
 }

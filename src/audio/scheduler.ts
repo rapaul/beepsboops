@@ -19,7 +19,7 @@ export const notesInQueue: ScheduledNote[] = [];
 
 function scheduleStep(state: SequencerState, time: number): void {
   for (const track of state.tracks) {
-    if (track.pattern[currentStep] && track.buffer) {
+    if (track.pattern[currentStep] && track.buffer && track.gain) {
       const semitones = track.pitches[currentStep];
       const rate = semitones !== 0
         ? Math.pow(2, semitones / 12)

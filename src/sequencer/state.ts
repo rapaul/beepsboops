@@ -1,4 +1,5 @@
 import { getMasterGain, getAudioContext } from '../audio/context';
+import { decodeAllSamples } from '../audio/sample-loader';
 import { TRACK_DEFS } from './tracks';
 
 export interface Track {
@@ -9,7 +10,7 @@ export interface Track {
   buffer: AudioBuffer | null;
   pattern: boolean[];
   pitches: number[];   // per-step semitone offset (melodic tracks)
-  gain: GainNode;
+  gain: GainNode | null;
 }
 
 export interface SequencerState {
@@ -31,23 +32,16 @@ function createEmptyPitches(): number[] {
 }
 
 export function createState(): SequencerState {
-  const ctx = getAudioContext();
-  const master = getMasterGain();
-
-  const tracks: Track[] = TRACK_DEFS.map((def) => {
-    const gain = ctx.createGain();
-    gain.connect(master);
-    return {
-      name: def.name,
-      shortName: def.shortName,
-      sampleUrl: def.sampleUrl,
-      melodic: def.melodic,
-      buffer: null,
-      pattern: createEmptyPattern(),
-      pitches: createEmptyPitches(),
-      gain,
-    };
-  });
+  const tracks: Track[] = TRACK_DEFS.map((def) => ({
+    name: def.name,
+    shortName: def.shortName,
+    sampleUrl: def.sampleUrl,
+    melodic: def.melodic,
+    buffer: null,
+    pattern: createEmptyPattern(),
+    pitches: createEmptyPitches(),
+    gain: null,
+  }));
 
   return {
     tracks,
@@ -56,6 +50,25 @@ export function createState(): SequencerState {
     currentStep: 0,
     activeTrackIndex: 0,
   };
+}
+
+/** Wire up GainNodes and decode samples. Call after AudioContext is live. */
+export async function initAudio(state: SequencerState): Promise<void> {
+  const ctx = getAudioContext();
+  const master = getMasterGain();
+
+  for (const track of state.tracks) {
+    if (!track.gain) {
+      track.gain = ctx.createGain();
+      track.gain.connect(master);
+    }
+  }
+
+  const urls = state.tracks.map((t) => t.sampleUrl);
+  const buffers = await decodeAllSamples(urls);
+  for (const track of state.tracks) {
+    track.buffer = buffers.get(track.sampleUrl) ?? null;
+  }
 }
 
 export function toggleStep(state: SequencerState, step: number): void {

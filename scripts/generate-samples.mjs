@@ -32,8 +32,8 @@ function createWav(samples) {
   buffer.writeUInt16LE(1, 22);         // mono
   buffer.writeUInt32LE(SAMPLE_RATE, 24);
   buffer.writeUInt32LE(byteRate, 28);
-  buffer.writeUInt16LE(blockAlign, 30);
-  buffer.writeUInt16LE(16, 32);        // bits per sample
+  buffer.writeUInt16LE(blockAlign, 32);
+  buffer.writeUInt16LE(16, 34);        // bits per sample
 
   // data chunk
   buffer.write('data', 36);

@@ -1,6 +1,5 @@
 import './style.css';
-import { getAudioContext } from './audio/context';
-import { loadAllSamples } from './audio/sample-loader';
+import { fetchAllSamples } from './audio/sample-loader';
 import { createState, loadSavedState } from './sequencer/state';
 import { TRACK_DEFS } from './sequencer/tracks';
 import { initGrid } from './ui/grid';
@@ -10,21 +9,13 @@ import { initTransportUI } from './ui/transport-ui';
 import { startPlayhead, stopPlayhead } from './ui/playhead';
 
 async function init(): Promise<void> {
-  // Force AudioContext creation so GainNodes can be wired
-  getAudioContext();
-
-  // Create sequencer state (wires up audio graph)
+  // Create sequencer state (no audio yet — deferred to first user gesture)
   const state = createState();
   loadSavedState(state);
 
-  // Load all samples
+  // Fetch raw sample data (no AudioContext needed)
   const sampleUrls = TRACK_DEFS.map((t) => t.sampleUrl);
-  const buffers = await loadAllSamples(sampleUrls);
-
-  // Assign loaded buffers to tracks
-  for (const track of state.tracks) {
-    track.buffer = buffers.get(track.sampleUrl) ?? null;
-  }
+  await fetchAllSamples(sampleUrls);
 
   // Build UI
   const app = document.getElementById('app')!;

@@ -13,7 +13,7 @@ export function startPlayhead(state: SequencerState): void {
 
     const ctx = getAudioContext();
     // Dequeue notes whose time has passed
-    while (notesInQueue.length && notesInQueue[0].time < ctx.currentTime) {
+    while (notesInQueue.length && notesInQueue[0].time <= ctx.currentTime) {
       currentStep = notesInQueue[0].step;
       notesInQueue.shift();
     }
