@@ -301,6 +301,29 @@ html, body {
   box-shadow: 0 0 12px rgba(255, 107, 53, 0.4);
 }
 
+.export-btn {
+  width: 52px;
+  height: 44px;
+  border: none;
+  border-radius: var(--btn-radius);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.export-btn:active {
+  transform: scale(0.97);
+  background: var(--accent);
+  color: #fff;
+}
+
 /* ── Wider screens ── */
 @media (min-width: 480px) {
   #app {
