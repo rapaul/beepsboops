@@ -1,41 +1,49 @@
 import type { SequencerState } from '../sequencer/state';
+import { loadPatternFromBank, saveCurrentToBank } from '../sequencer/state';
 
-let bpmEl: HTMLElement;
-let trackNameEl: HTMLElement;
-let stepsEl: HTMLElement;
-let statusEl: HTMLElement;
+let buttons: HTMLButtonElement[] = [];
 
-export function initDisplay(container: HTMLElement): void {
-  container.innerHTML = `
-    <div class="display-row">
-      <span class="display-status" id="display-status">STOP</span>
-      <span class="display-bpm" id="display-bpm">120</span>
-    </div>
-    <div class="display-track" id="display-track">Kick</div>
-    <div class="display-steps" id="display-steps"></div>
-  `;
+export function initPatternSelector(
+  container: HTMLElement,
+  state: SequencerState,
+  onPatternChange: () => void,
+): void {
+  container.innerHTML = '';
 
-  bpmEl = document.getElementById('display-bpm')!;
-  trackNameEl = document.getElementById('display-track')!;
-  stepsEl = document.getElementById('display-steps')!;
-  statusEl = document.getElementById('display-status')!;
+  for (let i = 0; i < 8; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'pattern-btn';
+    btn.textContent = String(i + 1);
+    btn.setAttribute('aria-label', `Pattern ${i + 1}`);
 
-  // Create 16 step dots
-  for (let i = 0; i < 16; i++) {
-    const dot = document.createElement('span');
-    dot.className = 'step-dot';
-    stepsEl.appendChild(dot);
+    btn.addEventListener('pointerdown', () => {
+      const targetIndex = i;
+      if (state.isPlaying) {
+        // Queue pattern switch at end of loop
+        if (targetIndex === state.activePatternIndex) {
+          // Clicking the active pattern cancels any pending switch
+          state.pendingPatternIndex = null;
+        } else {
+          saveCurrentToBank(state);
+          state.pendingPatternIndex = targetIndex;
+        }
+      } else {
+        if (targetIndex === state.activePatternIndex) return;
+        loadPatternFromBank(state, targetIndex);
+      }
+      onPatternChange();
+    });
+
+    container.appendChild(btn);
+    buttons.push(btn);
   }
+
+  updatePatternSelector(state);
 }
 
-export function updateDisplay(state: SequencerState, playingStep: number | null): void {
-  bpmEl.textContent = String(state.bpm);
-  trackNameEl.textContent = state.tracks[state.activeTrackIndex].name;
-  statusEl.textContent = state.isPlaying ? 'PLAY' : 'STOP';
-  statusEl.classList.toggle('status-playing', state.isPlaying);
-
-  const dots = stepsEl.children;
-  for (let i = 0; i < 16; i++) {
-    (dots[i] as HTMLElement).classList.toggle('dot-active', i === playingStep);
+export function updatePatternSelector(state: SequencerState): void {
+  for (let i = 0; i < buttons.length; i++) {
+    buttons[i].classList.toggle('pattern-active', i === state.activePatternIndex);
+    buttons[i].classList.toggle('pattern-pending', i === state.pendingPatternIndex);
   }
 }

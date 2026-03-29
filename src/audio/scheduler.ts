@@ -1,6 +1,7 @@
 import { getAudioContext } from './context';
 import { playSample } from './sample-player';
 import type { SequencerState } from '../sequencer/state';
+import { applyPendingPattern } from '../sequencer/state';
 
 const LOOKAHEAD_MS = 25;
 const SCHEDULE_AHEAD_S = 0.1;
@@ -36,6 +37,9 @@ function advanceStep(state: SequencerState): void {
   const secondsPerStep = secondsPerBeat / 4; // 16th notes
   nextNoteTime += secondsPerStep;
   currentStep = (currentStep + 1) % 16;
+  if (currentStep === 0) {
+    applyPendingPattern(state);
+  }
 }
 
 function schedulerTick(state: SequencerState): void {

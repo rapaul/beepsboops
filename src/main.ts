@@ -1,12 +1,12 @@
 import './style.css';
 import { fetchAllSamples } from './audio/sample-loader';
-import { createState, loadSavedState } from './sequencer/state';
+import { createState, loadSavedState, saveState } from './sequencer/state';
 import { TRACK_DEFS } from './sequencer/tracks';
-import { initGrid } from './ui/grid';
-import { initDisplay, updateDisplay } from './ui/display';
+import { initGrid, updateGrid } from './ui/grid';
+import { initPatternSelector, updatePatternSelector } from './ui/display';
 import { initTrackSelector } from './ui/track-selector';
 import { initTransportUI } from './ui/transport-ui';
-import { startPlayhead, stopPlayhead } from './ui/playhead';
+import { startPlayhead, stopPlayhead, setOnLoop } from './ui/playhead';
 
 async function init(): Promise<void> {
   // Create sequencer state (no audio yet — deferred to first user gesture)
@@ -26,11 +26,13 @@ async function init(): Promise<void> {
     <div id="transport"></div>
   `;
 
-  initDisplay(document.getElementById('display')!);
   initGrid(document.getElementById('grid')!, state);
-  initTrackSelector(document.getElementById('tracks')!, state, () => {
-    updateDisplay(state, null);
+  initPatternSelector(document.getElementById('display')!, state, () => {
+    updateGrid();
+    saveState(state);
+    updatePatternSelector(state);
   });
+  initTrackSelector(document.getElementById('tracks')!, state, () => {});
 
   // Transport with playhead integration
   initTransportUI(document.getElementById('transport')!, state, () => {
@@ -39,10 +41,16 @@ async function init(): Promise<void> {
     } else {
       stopPlayhead(state);
     }
-    updateDisplay(state, null);
   });
 
-  updateDisplay(state, null);
+  // When the loop wraps, sync UI if the scheduler applied a pending pattern
+  setOnLoop(() => {
+    updatePatternSelector(state);
+    updateGrid();
+    saveState(state);
+  });
+
+  updatePatternSelector(state);
 }
 
 init();

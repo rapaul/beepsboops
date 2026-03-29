@@ -2,10 +2,15 @@ import { getAudioContext } from '../audio/context';
 import { notesInQueue } from '../audio/scheduler';
 import type { SequencerState } from '../sequencer/state';
 import { setPlayingStep } from './grid';
-import { updateDisplay } from './display';
 
 let animFrameId: number | null = null;
 let lastDrawnStep: number | null = null;
+
+let onLoopCallback: (() => void) | null = null;
+
+export function setOnLoop(cb: () => void): void {
+  onLoopCallback = cb;
+}
 
 export function startPlayhead(state: SequencerState): void {
   function draw(): void {
@@ -19,16 +24,16 @@ export function startPlayhead(state: SequencerState): void {
     }
 
     if (currentStep !== null && currentStep !== lastDrawnStep) {
+      const looped = lastDrawnStep !== null && currentStep === 0;
       lastDrawnStep = currentStep;
       state.currentStep = currentStep;
       setPlayingStep(currentStep);
-      updateDisplay(state, currentStep);
+      if (looped && onLoopCallback) onLoopCallback();
     }
 
     if (!state.isPlaying) {
       lastDrawnStep = null;
       setPlayingStep(null);
-      updateDisplay(state, null);
       animFrameId = null;
       return;
     }
@@ -40,12 +45,11 @@ export function startPlayhead(state: SequencerState): void {
   animFrameId = requestAnimationFrame(draw);
 }
 
-export function stopPlayhead(state: SequencerState): void {
+export function stopPlayhead(_state: SequencerState): void {
   if (animFrameId !== null) {
     cancelAnimationFrame(animFrameId);
     animFrameId = null;
   }
   lastDrawnStep = null;
   setPlayingStep(null);
-  updateDisplay(state, null);
 }
