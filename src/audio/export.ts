@@ -9,10 +9,21 @@ export async function exportWav(state: SequencerState): Promise<void> {
   const secondsPerStep = 60 / state.bpm / 4;
   const loopDuration = secondsPerStep * 16;
 
-  // Add tail time so the last step's sample can ring out
-  const tailSeconds = 2;
-  const totalSeconds = loopDuration + tailSeconds;
-  const totalFrames = Math.ceil(totalSeconds * sampleRate);
+  // Find the latest point any sample finishes playing
+  let endTime = loopDuration;
+  for (const track of state.tracks) {
+    if (!track.buffer) continue;
+    for (let step = 0; step < 16; step++) {
+      if (!track.pattern[step]) continue;
+      const time = step * secondsPerStep;
+      const semitones = track.pitches[step];
+      const rate = semitones !== 0 ? Math.pow(2, semitones / 12) : 1.0;
+      const sampleEnd = time + track.buffer.duration / rate;
+      if (sampleEnd > endTime) endTime = sampleEnd;
+    }
+  }
+
+  const totalFrames = Math.ceil(endTime * sampleRate);
 
   const offline = new OfflineAudioContext(2, totalFrames, sampleRate);
 
@@ -52,23 +63,8 @@ export async function exportWav(state: SequencerState): Promise<void> {
   }
 
   const rendered = await offline.startRendering();
-
-  // Trim to loop duration (keep a tiny fade-out at end)
-  const loopFrames = Math.ceil(loopDuration * sampleRate);
-  const trimmed = trimBuffer(rendered, loopFrames);
-
-  const wav = encodeWav(trimmed);
+  const wav = encodeWav(rendered);
   downloadBlob(wav, `beepsboops-${state.bpm}bpm.wav`);
-}
-
-function trimBuffer(buffer: AudioBuffer, frames: number): AudioBuffer {
-  const ctx = new OfflineAudioContext(buffer.numberOfChannels, frames, buffer.sampleRate);
-  const trimmed = ctx.createBuffer(buffer.numberOfChannels, frames, buffer.sampleRate);
-  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
-    const src = buffer.getChannelData(ch);
-    trimmed.getChannelData(ch).set(src.subarray(0, frames));
-  }
-  return trimmed;
 }
 
 function encodeWav(buffer: AudioBuffer): Blob {
