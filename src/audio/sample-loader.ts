@@ -44,3 +44,32 @@ export async function decodeAllSamples(urls: string[]): Promise<Map<string, Audi
 export function getBuffer(url: string): AudioBuffer | undefined {
   return bufferCache.get(url);
 }
+
+/** Inject a raw ArrayBuffer under a custom key (e.g. "custom:S1"). */
+export function injectRawSample(key: string, raw: ArrayBuffer): void {
+  rawCache.set(key, raw);
+}
+
+/** Decode a previously-injected raw sample by key. */
+export async function decodeInjectedSample(key: string): Promise<AudioBuffer | null> {
+  const cached = bufferCache.get(key);
+  if (cached) return cached;
+
+  const raw = rawCache.get(key);
+  if (!raw) return null;
+
+  const ctx = getAudioContext();
+  try {
+    const audioBuffer = await ctx.decodeAudioData(raw.slice(0));
+    bufferCache.set(key, audioBuffer);
+    return audioBuffer;
+  } catch {
+    return null;
+  }
+}
+
+/** Remove a cached buffer (e.g. after clearing a custom sample). */
+export function clearBuffer(key: string): void {
+  rawCache.delete(key);
+  bufferCache.delete(key);
+}

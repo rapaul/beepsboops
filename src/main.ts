@@ -1,5 +1,6 @@
 import './style.css';
-import { fetchAllSamples } from './audio/sample-loader';
+import { fetchAllSamples, injectRawSample } from './audio/sample-loader';
+import { loadAllCustomSamples } from './audio/sample-store';
 import { createState, loadSavedState, saveState } from './sequencer/state';
 import { TRACK_DEFS } from './sequencer/tracks';
 import { initGrid, updateGrid } from './ui/grid';
@@ -13,8 +14,18 @@ async function init(): Promise<void> {
   const state = createState();
   loadSavedState(state);
 
-  // Fetch raw sample data (no AudioContext needed)
-  const sampleUrls = TRACK_DEFS.map((t) => t.sampleUrl);
+  // Load custom samples from IndexedDB and inject into raw cache
+  try {
+    const customSamples = await loadAllCustomSamples();
+    for (const [slotKey, raw] of customSamples) {
+      injectRawSample(`custom:${slotKey}`, raw);
+    }
+  } catch {
+    // IndexedDB unavailable — custom samples won't persist
+  }
+
+  // Fetch raw sample data for built-in tracks (no AudioContext needed)
+  const sampleUrls = TRACK_DEFS.map((t) => t.sampleUrl).filter((u) => u);
   await fetchAllSamples(sampleUrls);
 
   // Build UI

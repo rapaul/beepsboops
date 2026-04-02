@@ -1,5 +1,5 @@
 import { getMasterGain, getAudioContext } from '../audio/context';
-import { decodeAllSamples } from '../audio/sample-loader';
+import { decodeAllSamples, decodeInjectedSample } from '../audio/sample-loader';
 import { TRACK_DEFS } from './tracks';
 
 export interface Track {
@@ -120,10 +120,22 @@ export async function initAudio(state: SequencerState): Promise<void> {
     }
   }
 
-  const urls = state.tracks.map((t) => t.sampleUrl);
+  // Decode built-in samples (those with URLs)
+  const urls = state.tracks.filter((t) => t.sampleUrl).map((t) => t.sampleUrl);
   const buffers = await decodeAllSamples(urls);
   for (const track of state.tracks) {
-    track.buffer = buffers.get(track.sampleUrl) ?? null;
+    if (track.sampleUrl) {
+      track.buffer = buffers.get(track.sampleUrl) ?? null;
+    }
+  }
+
+  // Decode custom samples (injected into rawCache on startup)
+  for (const track of state.tracks) {
+    if (TRACK_DEFS.find((d) => d.shortName === track.shortName)?.custom) {
+      const key = `custom:${track.shortName}`;
+      const buf = await decodeInjectedSample(key);
+      if (buf) track.buffer = buf;
+    }
   }
 }
 
