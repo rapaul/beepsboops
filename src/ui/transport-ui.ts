@@ -4,6 +4,81 @@ import { togglePlayback, setBpm } from '../sequencer/transport';
 import { exportWav } from '../audio/export';
 import { exportProjectFile, importProjectFile } from '../sequencer/file-io';
 
+function openPatchModal(state: SequencerState): void {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const box = document.createElement('div');
+  box.className = 'modal-tui';
+
+  const title = '╔══ PATCH ══╗';
+  const footer = '╚' + '═'.repeat(title.length - 2) + '╝';
+
+  const options: { label: string; action: () => Promise<void> | void }[] = [
+    {
+      label: 'EXPORT WAV',
+      action: async () => {
+        close();
+        await exportWav(state);
+      },
+    },
+    {
+      label: 'SAVE FILE',
+      action: async () => {
+        close();
+        await exportProjectFile(state);
+      },
+    },
+    {
+      label: 'LOAD FILE',
+      action: () => {
+        close();
+        importProjectFile();
+      },
+    },
+    {
+      label: 'CANCEL',
+      action: () => close(),
+    },
+  ];
+
+  function render() {
+    box.innerHTML = '';
+    const lines = [title, ''];
+    for (const opt of options) {
+      lines.push('  ' + opt.label);
+    }
+    lines.push('', footer);
+
+    for (const line of lines) {
+      const div = document.createElement('div');
+      div.textContent = line;
+      const opt = options.find((o) => line.trim() === o.label);
+      if (opt) {
+        div.className = 'modal-tui-option';
+        div.addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+          opt.action();
+        });
+      }
+      box.appendChild(div);
+    }
+  }
+
+  function close() {
+    overlay.remove();
+  }
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('pointerdown', (e) => {
+    if (e.target === overlay) close();
+  });
+
+  render();
+}
+
 export function initTransportUI(
   container: HTMLElement,
   state: SequencerState,
@@ -17,16 +92,12 @@ export function initTransportUI(
         <button class="bpm-btn" id="bpm-up" aria-label="Increase BPM">+</button>
       </div>
       <button class="play-btn" id="play-btn" aria-label="Play/Stop">PLAY</button>
-      <button class="export-btn" id="export-btn" aria-label="Export WAV">WAV</button>
-      <button class="export-btn" id="save-btn" aria-label="Save project">SAVE</button>
-      <button class="export-btn" id="load-btn" aria-label="Load project">LOAD</button>
+      <button class="export-btn" id="patch-btn" aria-label="Patch menu">PATCH</button>
     </div>
   `;
 
   const playBtn = document.getElementById('play-btn')!;
-  const exportBtn = document.getElementById('export-btn')!;
-  const saveBtn = document.getElementById('save-btn')!;
-  const loadBtn = document.getElementById('load-btn')!;
+  const patchBtn = document.getElementById('patch-btn')!;
   const bpmDown = document.getElementById('bpm-down')!;
   const bpmUp = document.getElementById('bpm-up')!;
   const bpmDisplay = document.getElementById('bpm-display')!;
@@ -38,26 +109,8 @@ export function initTransportUI(
     onTransportChange();
   });
 
-  exportBtn.addEventListener('pointerdown', async () => {
-    exportBtn.textContent = '...';
-    try {
-      await exportWav(state);
-    } finally {
-      exportBtn.textContent = 'WAV';
-    }
-  });
-
-  saveBtn.addEventListener('pointerdown', async () => {
-    saveBtn.textContent = '...';
-    try {
-      await exportProjectFile(state);
-    } finally {
-      saveBtn.textContent = 'SAVE';
-    }
-  });
-
-  loadBtn.addEventListener('pointerdown', () => {
-    importProjectFile();
+  patchBtn.addEventListener('pointerdown', () => {
+    openPatchModal(state);
   });
 
   const adjustBpm = (delta: number) => {
