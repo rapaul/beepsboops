@@ -277,6 +277,142 @@ html, body {
   to { opacity: 0.4; }
 }
 
+/* ── Pitch Keyboard ── */
+.pitch-keyboard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  touch-action: manipulation;
+}
+
+.pitch-keyboard-modal {
+  width: 100%;
+  background: var(--bg-surface);
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pitch-keyboard-header {
+  padding: 12px 16px 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pk-current {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.pk-vol-section {
+  padding: 8px 16px 12px;
+  flex-shrink: 0;
+}
+
+.pk-vol-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.pk-vol-slider {
+  width: 100%;
+  accent-color: var(--accent);
+  height: 4px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.pitch-keyboard-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+}
+
+.pitch-keyboard-keys {
+  position: relative;
+}
+
+.pk-key {
+  position: absolute;
+  top: 0;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border-radius: 0 0 4px 4px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pk-white {
+  background: #e8e8e8;
+  border: 1px solid #999;
+  border-top: none;
+  z-index: 1;
+}
+
+.pk-white.pk-selected {
+  background: var(--step-playing);
+}
+
+.pk-black {
+  background: #1a1a1a;
+  border: 1px solid #000;
+  border-top: none;
+  z-index: 2;
+}
+
+.pk-black.pk-selected {
+  background: var(--accent);
+}
+
+.pitch-keyboard-footer {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  flex-shrink: 0;
+}
+
+.pk-cancel-btn,
+.pk-ok-btn {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: var(--btn-radius);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pk-cancel-btn {
+  background: var(--step-inactive);
+  color: var(--text-secondary);
+}
+
+.pk-ok-btn {
+  background: var(--accent);
+  color: #fff;
+}
+
 /* ── Transport Controls ── */
 #transport {
   flex-shrink: 0;
