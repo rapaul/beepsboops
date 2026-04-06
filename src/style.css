@@ -7,6 +7,7 @@
 
 /* ── Custom Properties ── */
 :root {
+  /* Default theme (navy/orange) */
   --bg-primary: #1a1a2e;
   --bg-surface: #16213e;
   --lcd-bg: #1e2d1e;
@@ -20,12 +21,84 @@
   --track-inactive: #3a3a5c;
   --text-primary: #e0e0e0;
   --text-secondary: #777;
+  /* Glow colours used in box-shadows */
+  --glow-accent: rgba(255, 107, 53, 0.3);
+  --glow-accent-lg: rgba(255, 107, 53, 0.4);
+  --glow-playing: rgba(255, 204, 2, 0.5);
+  --glow-playing-lg: rgba(255, 204, 2, 0.2);
+  --glow-lcd: rgba(126, 200, 126, 0.15);
   --btn-radius: 6px;
   --gap: 6px;
 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   color: var(--text-primary);
   background: var(--bg-primary);
+}
+
+/* ── Theme: black ── */
+[data-theme="black"] {
+  --bg-primary: #000000;
+  --bg-surface: #0a0a0a;
+  --lcd-bg: #001400;
+  --lcd-text: #00ff41;
+  --lcd-dim: #002800;
+  --accent: #00d4ff;
+  --step-active: #00d4ff;
+  --step-inactive: #111111;
+  --step-playing: #ffffff;
+  --track-active: #00d4ff;
+  --track-inactive: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #555555;
+  --glow-accent: rgba(0, 212, 255, 0.3);
+  --glow-accent-lg: rgba(0, 212, 255, 0.4);
+  --glow-playing: rgba(255, 255, 255, 0.4);
+  --glow-playing-lg: rgba(255, 255, 255, 0.15);
+  --glow-lcd: rgba(0, 255, 65, 0.15);
+}
+
+/* ── Theme: green ── */
+[data-theme="green"] {
+  --bg-primary: #0d1a0d;
+  --bg-surface: #0a150a;
+  --lcd-bg: #162616;
+  --lcd-text: #a8ff3e;
+  --lcd-dim: #1f3d1f;
+  --accent: #39ff14;
+  --step-active: #39ff14;
+  --step-inactive: #162616;
+  --step-playing: #ffff00;
+  --track-active: #39ff14;
+  --track-inactive: #122012;
+  --text-primary: #c8ffc8;
+  --text-secondary: #4a7a4a;
+  --glow-accent: rgba(57, 255, 20, 0.3);
+  --glow-accent-lg: rgba(57, 255, 20, 0.4);
+  --glow-playing: rgba(255, 255, 0, 0.5);
+  --glow-playing-lg: rgba(255, 255, 0, 0.2);
+  --glow-lcd: rgba(168, 255, 62, 0.15);
+}
+
+/* ── Theme: pink ── */
+[data-theme="pink"] {
+  --bg-primary: #1a0a1e;
+  --bg-surface: #130813;
+  --lcd-bg: #2e1a2e;
+  --lcd-text: #ff88cc;
+  --lcd-dim: #3d1a3d;
+  --accent: #ff2d8a;
+  --step-active: #ff2d8a;
+  --step-inactive: #2a1a2e;
+  --step-playing: #ffaaee;
+  --track-active: #ff2d8a;
+  --track-inactive: #261a2a;
+  --text-primary: #ffd4f4;
+  --text-secondary: #7a5a7a;
+  --glow-accent: rgba(255, 45, 138, 0.3);
+  --glow-accent-lg: rgba(255, 45, 138, 0.4);
+  --glow-playing: rgba(255, 170, 238, 0.5);
+  --glow-playing-lg: rgba(255, 170, 238, 0.2);
+  --glow-lcd: rgba(255, 136, 204, 0.15);
 }
 
 html, body {
@@ -104,14 +177,14 @@ html, body {
 .pattern-btn.pattern-active {
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 0 8px var(--glow-accent);
 }
 
 .pattern-btn.pattern-pending {
   background: var(--accent);
   color: #fff;
   opacity: 0.5;
-  box-shadow: 0 0 8px rgba(255, 107, 53, 0.2);
+  box-shadow: 0 0 8px var(--glow-accent);
 }
 
 /* ── Step Grid ── */
@@ -141,22 +214,22 @@ html, body {
 .step-btn.active {
   background: var(--step-active);
   box-shadow:
-    0 0 12px rgba(255, 107, 53, 0.3),
+    0 0 12px var(--glow-accent),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .step-btn.playing {
   background: var(--step-playing) !important;
   box-shadow:
-    0 0 16px rgba(255, 204, 2, 0.5),
-    0 0 32px rgba(255, 204, 2, 0.2);
+    0 0 16px var(--glow-playing),
+    0 0 32px var(--glow-playing-lg);
 }
 
 .step-btn.active.playing {
   background: var(--step-playing) !important;
   box-shadow:
-    0 0 20px rgba(255, 204, 2, 0.6),
-    0 0 40px rgba(255, 204, 2, 0.3);
+    0 0 20px var(--glow-playing),
+    0 0 40px var(--glow-playing-lg);
 }
 
 .pitch-label {
@@ -210,7 +283,7 @@ html, body {
 .track-btn.track-active {
   background: var(--track-active);
   color: #fff;
-  box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 0 8px var(--glow-accent);
 }
 
 .track-btn.custom {
@@ -221,7 +294,7 @@ html, body {
   background: var(--lcd-text);
   color: var(--lcd-bg);
   border-color: var(--lcd-text);
-  box-shadow: 0 0 8px rgba(126, 200, 126, 0.3);
+  box-shadow: 0 0 8px var(--glow-lcd);
 }
 
 .track-btn.custom.empty {
@@ -251,7 +324,7 @@ html, body {
   white-space: pre;
   line-height: 1.6;
   text-shadow: 0 0 4px var(--lcd-text);
-  box-shadow: 0 0 24px rgba(126, 200, 126, 0.15), inset 0 0 80px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 24px var(--glow-lcd), inset 0 0 80px rgba(0, 0, 0, 0.3);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -487,7 +560,7 @@ html, body {
 .play-btn.playing {
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 0 12px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 0 12px var(--glow-accent-lg);
 }
 
 .export-btn {
