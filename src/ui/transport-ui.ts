@@ -2,6 +2,7 @@ import type { SequencerState } from '../sequencer/state';
 import { saveState } from '../sequencer/state';
 import { togglePlayback, setBpm } from '../sequencer/transport';
 import { exportWav } from '../audio/export';
+import { exportProjectFile, importProjectFile } from '../sequencer/file-io';
 
 export function initTransportUI(
   container: HTMLElement,
@@ -17,11 +18,15 @@ export function initTransportUI(
       </div>
       <button class="play-btn" id="play-btn" aria-label="Play/Stop">PLAY</button>
       <button class="export-btn" id="export-btn" aria-label="Export WAV">WAV</button>
+      <button class="export-btn" id="save-btn" aria-label="Save project">SAVE</button>
+      <button class="export-btn" id="load-btn" aria-label="Load project">LOAD</button>
     </div>
   `;
 
   const playBtn = document.getElementById('play-btn')!;
   const exportBtn = document.getElementById('export-btn')!;
+  const saveBtn = document.getElementById('save-btn')!;
+  const loadBtn = document.getElementById('load-btn')!;
   const bpmDown = document.getElementById('bpm-down')!;
   const bpmUp = document.getElementById('bpm-up')!;
   const bpmDisplay = document.getElementById('bpm-display')!;
@@ -40,6 +45,19 @@ export function initTransportUI(
     } finally {
       exportBtn.textContent = 'WAV';
     }
+  });
+
+  saveBtn.addEventListener('pointerdown', async () => {
+    saveBtn.textContent = '...';
+    try {
+      await exportProjectFile(state);
+    } finally {
+      saveBtn.textContent = 'SAVE';
+    }
+  });
+
+  loadBtn.addEventListener('pointerdown', () => {
+    importProjectFile();
   });
 
   const adjustBpm = (delta: number) => {

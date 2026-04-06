@@ -31,7 +31,7 @@ export interface SequencerState {
   patternBank: PatternSlot[];
 }
 
-const STORAGE_KEY = 'beepsboops-state';
+export const STORAGE_KEY = 'beepsboops-state';
 
 function createEmptyPattern(): boolean[] {
   return new Array(16).fill(false);
@@ -160,7 +160,7 @@ export function getActiveTrack(state: SequencerState): Track {
 
 // Persistence
 
-interface SavedStateV2 {
+export interface SavedStateV2 {
   version: 2;
   patternBank: PatternSlot[];
   activePatternIndex: number;
