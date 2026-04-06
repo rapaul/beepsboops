@@ -38,11 +38,11 @@ test.describe('sequencer grid', () => {
     await expect(steps).toHaveCount(16);
   });
 
-  test('renders 8 track buttons', async ({ page }) => {
+  test('renders 16 track buttons (8 built-in + 8 custom)', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#tracks')).toBeVisible();
     const tracks = page.locator('.track-btn');
-    await expect(tracks).toHaveCount(8);
+    await expect(tracks).toHaveCount(16);
   });
 
   test('first track is selected by default', async ({ page }) => {
@@ -62,6 +62,7 @@ test.describe('interactivity', () => {
     await expect(step).not.toHaveClass(/active/);
 
     await step.dispatchEvent('pointerdown');
+    await step.dispatchEvent('pointerup');
     await expect(step).toHaveClass(/active/);
   });
 
@@ -71,9 +72,11 @@ test.describe('interactivity', () => {
 
     const step = page.locator('.step-btn').nth(0);
     await step.dispatchEvent('pointerdown');
+    await step.dispatchEvent('pointerup');
     await expect(step).toHaveClass(/active/);
 
     await step.dispatchEvent('pointerdown');
+    await step.dispatchEvent('pointerup');
     await expect(step).not.toHaveClass(/active/);
   });
 
@@ -84,6 +87,7 @@ test.describe('interactivity', () => {
     // Activate step 0 on the first track
     const step0 = page.locator('.step-btn').nth(0);
     await step0.dispatchEvent('pointerdown');
+    await step0.dispatchEvent('pointerup');
     await expect(step0).toHaveClass(/active/);
 
     // Switch to second track — step 0 should no longer be active

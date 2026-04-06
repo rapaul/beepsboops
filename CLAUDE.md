@@ -35,6 +35,17 @@ Thin DOM manipulation. Each module exports an `init()` function that creates ele
 - **No `click` events on interactive elements** — use `pointerdown` for zero-latency touch response.
 - **Audio context must be resumed on user gesture** — `ensureAudioReady()` in `src/audio/context.ts` handles this including the iOS Safari silent buffer trick.
 
+## Testing
+
+After every change, run the Playwright test suite and verify layout visually:
+
+1. `pnpm exec playwright test` — run all tests
+2. Review any screenshot diffs or failures before considering the task done
+3. If no tests cover the changed area, write a Playwright test for it
+4. For layout changes, use `page.screenshot()` and inspect the result — check mobile viewport (`375×667`) and desktop (`1280×800`)
+
+Add `pnpm exec playwright test` to the Commands section if not already set up, and install via `pnpm exec playwright install` if browsers are missing.
+
 ## Gotchas
 
 - `AudioBufferSourceNode` is single-use — create a new one per trigger, never reuse.

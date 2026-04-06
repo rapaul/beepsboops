@@ -41,7 +41,6 @@ html, body {
 #app {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
   max-width: 420px;
   margin: 0 auto;
   padding: 12px;
@@ -120,8 +119,7 @@ html, body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--gap);
-  flex: 1;
-  min-height: 0;
+  flex-shrink: 0;
 }
 
 .step-btn {
@@ -159,6 +157,21 @@ html, body {
   box-shadow:
     0 0 20px rgba(255, 204, 2, 0.6),
     0 0 40px rgba(255, 204, 2, 0.3);
+}
+
+.pitch-label {
+  position: absolute;
+  bottom: 2px;
+  right: 3px;
+  font-size: 8px;
+  line-height: 1;
+  color: var(--step-playing);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.pitch-label:not(:empty) {
+  opacity: 1;
 }
 
 /* ── Track Selector ── */
