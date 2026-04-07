@@ -82,8 +82,10 @@ export function updateGrid(): void {
     gridButtons[i].classList.toggle('active', track.pattern[i]);
     if (track.pattern[i]) {
       gridButtons[i].style.opacity = String(0.3 + track.volumes[i] * 0.7);
+      gridButtons[i].style.setProperty('--vol', String(track.volumes[i]));
     } else {
       gridButtons[i].style.opacity = '';
+      gridButtons[i].style.removeProperty('--vol');
     }
     updatePitchLabel(pitchLabels[i], track.pitches[i]);
   }
