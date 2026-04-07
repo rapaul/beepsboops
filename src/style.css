@@ -702,13 +702,13 @@ html, body {
 
 /* ── Actions Bar ── */
 #actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   flex-shrink: 0;
 }
 
 .action-btn {
-  flex: 1;
   height: 44px;
   border: none;
   border-radius: var(--btn-radius);
@@ -736,7 +736,6 @@ html, body {
 }
 
 .wat-link {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -759,7 +758,8 @@ html, body {
 }
 
 .transport-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   align-items: center;
 }
@@ -772,7 +772,8 @@ html, body {
   background: var(--bg-surface);
   border-radius: var(--btn-radius);
   padding: 4px;
-  flex: 1;
+  height: 44px;
+  box-sizing: border-box;
 }
 
 .bpm-btn {
@@ -807,7 +808,6 @@ html, body {
 }
 
 .play-btn {
-  flex: 1;
   height: 44px;
   border: none;
   border-radius: var(--btn-radius);

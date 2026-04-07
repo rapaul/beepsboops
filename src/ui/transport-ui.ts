@@ -86,13 +86,13 @@ export function initTransportUI(
 ): void {
   container.innerHTML = `
     <div class="transport-row">
+      <button class="play-btn" id="play-btn" aria-label="Play/Stop">PLAY</button>
+      <button class="action-btn" id="patch-btn" aria-label="Patch menu">PATCH</button>
       <div class="bpm-controls">
         <button class="bpm-btn" id="bpm-down" aria-label="Decrease BPM">-</button>
         <span class="bpm-value" id="bpm-display">${state.bpm}</span>
         <button class="bpm-btn" id="bpm-up" aria-label="Increase BPM">+</button>
       </div>
-      <button class="play-btn" id="play-btn" aria-label="Play/Stop">PLAY</button>
-      <button class="play-btn" id="patch-btn" aria-label="Patch menu">PATCH</button>
     </div>
   `;
 
