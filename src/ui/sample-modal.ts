@@ -360,6 +360,8 @@ export function openSampleModal(
       injectRawSample(key, rawBuf);
       const decoded = await decodeInjectedSample(key);
       track.buffer = decoded;
+      track.sampleStart = 0;
+      track.sampleEnd = 1;
       await storeSample(slotKey, rawBuf);
       showDone();
       return;
@@ -367,6 +369,8 @@ export function openSampleModal(
 
     const trimmed = trimSilence(audioBuf);
     track.buffer = trimmed;
+    track.sampleStart = 0;
+    track.sampleEnd = 1;
 
     // Store the trimmed version as WAV so it loads trimmed on next visit
     const wavBuf = audioBufferToWav(trimmed);
