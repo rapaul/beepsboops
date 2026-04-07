@@ -239,6 +239,15 @@ export function initActionsBar(
     }
   });
 
+  const watLink = document.createElement('a');
+  watLink.className = 'wat-link';
+  watLink.textContent = 'wat?';
+  watLink.href = '/help.html';
+  watLink.target = '_blank';
+  watLink.rel = 'noopener';
+  watLink.setAttribute('aria-label', 'Open cheatsheet');
+
   container.appendChild(clearBtn);
   container.appendChild(copyBtnEl);
+  container.appendChild(watLink);
 }

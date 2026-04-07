@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beepsboops — cheatsheet</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ebebeb;
+      --border: #000;
+      --text: #000;
+      --dim: #666;
+      --radius: 6px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px 16px 40px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: var(--dim);
+      letter-spacing: 0.08em;
+      margin-bottom: 24px;
+    }
+
+    section {
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 4px;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    td {
+      padding: 5px 0;
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    td:first-child {
+      width: 36%;
+      padding-right: 12px;
+    }
+
+    tr:not(:last-child) td {
+      border-bottom: 1px solid var(--surface);
+    }
+
+    .key {
+      display: inline-block;
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1px 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .key.active {
+      background: var(--border);
+      color: #fff;
+    }
+
+    .dim { color: var(--dim); }
+
+    .note {
+      font-size: 0.72rem;
+      color: var(--dim);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 28px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>beepsboops</h1>
+  <p class="subtitle">16-step pocket sequencer — cheatsheet</p>
+
+  <section>
+    <h2>Patterns (top row)</h2>
+    <table>
+      <tr>
+        <td><span class="key">1</span>–<span class="key">8</span></td>
+        <td>Switch pattern. While playing, queues the switch at end of loop.</td>
+      </tr>
+      <tr>
+        <td><span class="key active">active</span></td>
+        <td>Filled = current pattern. Dashed outline = queued (pending).</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Step grid (16 buttons)</h2>
+    <table>
+      <tr>
+        <td><span class="key">tap</span></td>
+        <td>Toggle step on/off for the active track.</td>
+      </tr>
+      <tr>
+        <td><span class="key">hold</span></td>
+        <td>Open pitch &amp; volume editor for that step (melodic tracks only show pitch keyboard; drum tracks go straight to volume).</td>
+      </tr>
+      <tr>
+        <td><span class="dim">cross-hatch</span></td>
+        <td>White theme only: hatch density = velocity. Denser = quieter.</td>
+      </tr>
+      <tr>
+        <td><span class="dim">number label</span></td>
+        <td>Semitone offset from root (e.g. <code>+7</code>, <code>-2</code>).</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Tracks</h2>
+    <table>
+      <tr>
+        <td><span class="key">KK SN HH OH<br>CP RM TM SY</span></td>
+        <td>Built-in drum/synth tracks. Tap to select.</td>
+      </tr>
+      <tr>
+        <td><span class="key">S1</span>–<span class="key">S8</span></td>
+        <td>Custom sample slots. <strong>Tap</strong> to select. <strong>Hold</strong> to open sample menu.</td>
+      </tr>
+      <tr>
+        <td><span class="dim">dashed border</span></td>
+        <td>Custom slot has no sample loaded yet.</td>
+      </tr>
+      <tr>
+        <td><span class="dim">SY track</span></td>
+        <td>Melodic — pitch changes playback rate (PO-style, changes duration too).</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Sample menu (hold custom track)</h2>
+    <table>
+      <tr>
+        <td><strong>Record mic</strong></td>
+        <td>Capture from microphone. Browser will request permission.</td>
+      </tr>
+      <tr>
+        <td><strong>Load file</strong></td>
+        <td>Import any audio file from device.</td>
+      </tr>
+      <tr>
+        <td><strong>Trim</strong></td>
+        <td>Open waveform trim editor. Drag handles to set start/end. Saved non-destructively.</td>
+      </tr>
+      <tr>
+        <td><strong>Clear</strong></td>
+        <td>Remove the loaded sample from this slot.</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Actions bar</h2>
+    <table>
+      <tr>
+        <td><span class="key">CLEAR</span></td>
+        <td>Wipe all steps across all 8 patterns (confirmation required).</td>
+      </tr>
+      <tr>
+        <td><span class="key">COPY</span></td>
+        <td>
+          Copy a pattern or sample.<br>
+          <span class="dim">With a drum/synth track active:</span> tap COPY → tap source pattern → tap destination pattern.<br>
+          <span class="dim">With a custom track active:</span> tap COPY → tap source custom track → tap destination custom track.<br>
+          Tap COPY again at any time to cancel.
+        </td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Transport</h2>
+    <table>
+      <tr>
+        <td><span class="key">−</span> <span class="key">+</span></td>
+        <td>Decrease / increase BPM by 1. Hold for fast repeat.</td>
+      </tr>
+      <tr>
+        <td><span class="key">PLAY / STOP</span></td>
+        <td>Start or stop playback. Pattern switches queue on PLAY.</td>
+      </tr>
+      <tr>
+        <td><span class="key">PATCH</span></td>
+        <td>Open patch menu: Export WAV · Save file · Load file.</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Patch menu</h2>
+    <table>
+      <tr>
+        <td><strong>Export WAV</strong></td>
+        <td>Render one full loop of the current pattern to a WAV file and download it.</td>
+      </tr>
+      <tr>
+        <td><strong>Save file</strong></td>
+        <td>Download a <code>.bbp</code> project file (all patterns + samples).</td>
+      </tr>
+      <tr>
+        <td><strong>Load file</strong></td>
+        <td>Import a <code>.bbp</code> project file, replacing current state.</td>
+      </tr>
+    </table>
+  </section>
+
+  <p class="note">
+    State is saved to localStorage automatically after every change.<br>
+    Audio context resumes on first interaction (required by browsers).
+  </p>
+
+  <a class="back" href="/">← back</a>
+
+</body>
+</html>

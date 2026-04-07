@@ -716,6 +716,7 @@ html, body {
   color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 700;
+  font-family: inherit;
   letter-spacing: 0.15em;
   cursor: pointer;
   transition: background 0.1s, color 0.1s, box-shadow 0.1s;
@@ -732,6 +733,24 @@ html, body {
   background: var(--accent);
   color: #fff;
   box-shadow: 0 0 8px var(--glow-accent);
+}
+
+.wat-link {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  flex-shrink: 0;
+  padding: 0 4px;
 }
 
 /* ── Transport Controls ── */
