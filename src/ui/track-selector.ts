@@ -2,6 +2,7 @@ import { type SequencerState, saveState } from '../sequencer/state';
 import { BUILTIN_COUNT } from '../sequencer/tracks';
 import { updateGrid } from './grid';
 import { openSampleModal } from './sample-modal';
+import { handleTrackSelect } from './actions-bar';
 
 const HOLD_THRESHOLD_MS = 500;
 
@@ -56,6 +57,7 @@ export function initTrackSelector(
       btn.addEventListener('pointerup', () => {
         if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
         if (!didLongPress) {
+          if (handleTrackSelect(i)) return;
           selectTrack(i);
         }
       });
@@ -69,6 +71,7 @@ export function initTrackSelector(
       });
     } else {
       btn.addEventListener('pointerdown', () => {
+        if (handleTrackSelect(i)) return;
         selectTrack(i);
       });
     }

@@ -129,10 +129,16 @@
 [data-theme="white"] .track-btn,
 [data-theme="white"] .bpm-btn,
 [data-theme="white"] .play-btn,
+[data-theme="white"] .action-btn,
 [data-theme="white"] .pk-cancel-btn,
 [data-theme="white"] .pk-ok-btn {
   border: 2px solid #000000;
   box-shadow: none !important;
+}
+
+[data-theme="white"] .action-btn.mode-active {
+  background: #000000;
+  color: #ffffff;
 }
 
 [data-theme="white"] .pattern-btn.pattern-active {
@@ -692,6 +698,40 @@ html, body {
 .pk-ok-btn {
   background: var(--accent);
   color: #fff;
+}
+
+/* ── Actions Bar ── */
+#actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: var(--btn-radius);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, box-shadow 0.1s;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.action-btn:active {
+  transform: scale(0.97);
+}
+
+.action-btn.mode-active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 8px var(--glow-accent);
 }
 
 /* ── Transport Controls ── */

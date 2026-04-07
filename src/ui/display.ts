@@ -1,5 +1,6 @@
 import type { SequencerState } from '../sequencer/state';
 import { loadPatternFromBank, saveCurrentToBank } from '../sequencer/state';
+import { handlePatternSelect } from './actions-bar';
 
 let buttons: HTMLButtonElement[] = [];
 
@@ -17,6 +18,7 @@ export function initPatternSelector(
     btn.setAttribute('aria-label', `Pattern ${i + 1}`);
 
     btn.addEventListener('pointerdown', () => {
+      if (handlePatternSelect(i)) return;
       const targetIndex = i;
       if (state.isPlaying) {
         // Queue pattern switch at end of loop

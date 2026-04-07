@@ -12,6 +12,7 @@ import { initGrid, updateGrid } from './ui/grid';
 import { initPatternSelector, updatePatternSelector } from './ui/display';
 import { initTrackSelector } from './ui/track-selector';
 import { initTransportUI } from './ui/transport-ui';
+import { initActionsBar } from './ui/actions-bar';
 import { startPlayhead, stopPlayhead, setOnLoop } from './ui/playhead';
 
 async function init(): Promise<void> {
@@ -40,6 +41,7 @@ async function init(): Promise<void> {
     <div id="grid"></div>
     <div id="tracks"></div>
     <div id="transport"></div>
+    <div id="actions"></div>
   `;
 
   initGrid(document.getElementById('grid')!, state);
@@ -57,6 +59,10 @@ async function init(): Promise<void> {
     } else {
       stopPlayhead(state);
     }
+  });
+
+  initActionsBar(document.getElementById('actions')!, state, () => {
+    updatePatternSelector(state);
   });
 
   // When the loop wraps, sync UI if the scheduler applied a pending pattern
