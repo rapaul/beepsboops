@@ -115,6 +115,53 @@
       border-radius: var(--radius);
       padding: 6px 14px;
     }
+
+    .theme-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .theme-item {
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .theme-preview {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-step-demo {
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+    }
+
+    .theme-step-demo.white-step {
+      background-color: #ffffff;
+      background-image:
+        repeating-linear-gradient( 45deg, #000 0, #000 1px, transparent 1px, transparent 50%),
+        repeating-linear-gradient(-45deg, #000 0, #000 1px, transparent 1px, transparent 50%);
+      background-size: 7px 7px;
+      border: 2px solid #000;
+    }
+
+    .theme-name {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
   </style>
 </head>
 <body>
@@ -255,6 +302,42 @@
         <td>Import a <code>.bbp</code> project file, replacing current state.</td>
       </tr>
     </table>
+  </section>
+
+  <section>
+    <h2>Colour themes</h2>
+    <div class="theme-list">
+      <a class="theme-item" href="/?colour=navy">
+        <div class="theme-preview" style="background:#1a1a2e;">
+          <div class="theme-step-demo" style="background:#ff6b35;"></div>
+        </div>
+        <span class="theme-name">navy</span>
+      </a>
+      <a class="theme-item" href="/?colour=black">
+        <div class="theme-preview" style="background:#000000;">
+          <div class="theme-step-demo" style="background:#00d4ff;"></div>
+        </div>
+        <span class="theme-name">black</span>
+      </a>
+      <a class="theme-item" href="/?colour=green">
+        <div class="theme-preview" style="background:#0d1a0d;">
+          <div class="theme-step-demo" style="background:#39ff14;"></div>
+        </div>
+        <span class="theme-name">green</span>
+      </a>
+      <a class="theme-item" href="/?colour=pink">
+        <div class="theme-preview" style="background:#1a0a1e;">
+          <div class="theme-step-demo" style="background:#ff2d8a;"></div>
+        </div>
+        <span class="theme-name">pink</span>
+      </a>
+      <a class="theme-item" href="/?colour=white">
+        <div class="theme-preview" style="background:#f5f5f5;">
+          <div class="theme-step-demo white-step"></div>
+        </div>
+        <span class="theme-name">white</span>
+      </a>
+    </div>
   </section>
 
   <p class="note">
