@@ -92,7 +92,7 @@ export function initTransportUI(
         <button class="bpm-btn" id="bpm-up" aria-label="Increase BPM">+</button>
       </div>
       <button class="play-btn" id="play-btn" aria-label="Play/Stop">PLAY</button>
-      <button class="export-btn" id="patch-btn" aria-label="Patch menu">PATCH</button>
+      <button class="play-btn" id="patch-btn" aria-label="Patch menu">PATCH</button>
     </div>
   `;
 
