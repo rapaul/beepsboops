@@ -7,12 +7,12 @@ let audioInitialized = false;
 
 export async function play(state: SequencerState): Promise<void> {
   if (state.isPlaying) return;
+  state.isPlaying = true;
   await ensureAudioReady();
   if (!audioInitialized) {
     await initAudio(state);
     audioInitialized = true;
   }
-  state.isPlaying = true;
   startScheduler(state);
 }
 
