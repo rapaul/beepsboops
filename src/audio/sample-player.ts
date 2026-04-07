@@ -6,6 +6,8 @@ export function playSample(
   destination: AudioNode,
   rate: number = 1.0,
   volume: number = 1.0,
+  offset: number = 0,
+  duration?: number,
 ): void {
   const ctx = getAudioContext();
   const source = ctx.createBufferSource();
@@ -21,5 +23,5 @@ export function playSample(
     source.connect(destination);
   }
 
-  source.start(time);
+  source.start(time, offset, duration);
 }

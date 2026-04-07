@@ -12,6 +12,8 @@ export interface Track {
   pitches: number[];   // per-step semitone offset (melodic tracks)
   volumes: number[];   // per-step volume 0.0–1.0 (default 1.0)
   gain: GainNode | null;
+  sampleStart: number; // normalized 0.0–1.0 trim start (non-destructive)
+  sampleEnd: number;   // normalized 0.0–1.0 trim end
 }
 
 export interface PatternSlot {
@@ -64,6 +66,8 @@ export function createState(): SequencerState {
     pitches: createEmptyPitches(),
     volumes: createDefaultVolumes(),
     gain: null,
+    sampleStart: 0,
+    sampleEnd: 1,
   }));
 
   const patternBank: PatternSlot[] = [];
@@ -160,12 +164,18 @@ export function getActiveTrack(state: SequencerState): Track {
 
 // Persistence
 
+export interface TrackTrimPoint {
+  sampleStart: number;
+  sampleEnd: number;
+}
+
 export interface SavedStateV2 {
   version: 2;
   patternBank: PatternSlot[];
   activePatternIndex: number;
   bpm: number;
   activeTrackIndex: number;
+  trackSettings?: TrackTrimPoint[];
 }
 
 interface SavedPatternLegacy {
@@ -188,6 +198,7 @@ export function saveState(state: SequencerState): void {
     activePatternIndex: state.activePatternIndex,
     bpm: state.bpm,
     activeTrackIndex: state.activeTrackIndex,
+    trackSettings: state.tracks.map((t) => ({ sampleStart: t.sampleStart, sampleEnd: t.sampleEnd })),
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
@@ -213,6 +224,12 @@ export function loadSavedState(state: SequencerState): void {
       state.activePatternIndex = saved.activePatternIndex ?? 0;
       if (saved.bpm) state.bpm = saved.bpm;
       if (saved.activeTrackIndex !== undefined) state.activeTrackIndex = saved.activeTrackIndex;
+      if (saved.trackSettings) {
+        for (let i = 0; i < state.tracks.length && i < saved.trackSettings.length; i++) {
+          state.tracks[i].sampleStart = saved.trackSettings[i].sampleStart ?? 0;
+          state.tracks[i].sampleEnd = saved.trackSettings[i].sampleEnd ?? 1;
+        }
+      }
     } else {
       // Legacy format: load into slot 0
       const legacy = data as SavedPatternLegacy;

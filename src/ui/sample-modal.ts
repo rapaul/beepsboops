@@ -50,6 +50,7 @@ export function openSampleModal(
 
   function showMenu() {
     const opts = ['RECORD SAMPLE'];
+    if (track.buffer) opts.push('TRIM SAMPLE');
     if (hasSample || track.buffer) opts.push('CLEAR SAMPLE');
     opts.push('CANCEL');
     const statusText = track.buffer
@@ -67,6 +68,9 @@ export function openSampleModal(
       if (line.startsWith('  RECORD') || line.startsWith('> RECORD')) {
         div.className = 'modal-tui-option';
         div.addEventListener('pointerdown', (e) => { e.stopPropagation(); startRecord(); });
+      } else if (line.startsWith('  TRIM') || line.startsWith('> TRIM')) {
+        div.className = 'modal-tui-option';
+        div.addEventListener('pointerdown', (e) => { e.stopPropagation(); showTrim(); });
       } else if (line.startsWith('  CLEAR') || line.startsWith('> CLEAR')) {
         div.className = 'modal-tui-option';
         div.addEventListener('pointerdown', (e) => { e.stopPropagation(); clearSample(); });
@@ -76,6 +80,201 @@ export function openSampleModal(
       }
       box.appendChild(div);
     }
+  }
+
+  function showTrim() {
+    // Close the sample menu overlay (skip onDone until trim editor exits)
+    if (recordTimer) { clearInterval(recordTimer); recordTimer = null; }
+    if (overlay) { overlay.remove(); overlay = null; }
+
+    const buf = track.buffer!;
+    const dur = buf.duration;
+    let startNorm = track.sampleStart;
+    let endNorm = track.sampleEnd;
+
+    const trimOverlay = document.createElement('div');
+    trimOverlay.className = 'modal-overlay';
+
+    const panel = document.createElement('div');
+    panel.className = 'trim-panel';
+
+    const header = document.createElement('div');
+    header.className = 'trim-header';
+    header.textContent = `\u2554\u2550\u2550 ${slotKey}: TRIM \u2550\u2550\u2557`;
+    panel.appendChild(header);
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'trim-canvas';
+    panel.appendChild(canvas);
+
+    const infoEl = document.createElement('div');
+    infoEl.className = 'trim-info';
+    panel.appendChild(infoEl);
+
+    const doneBtn = document.createElement('div');
+    doneBtn.className = 'modal-tui-option trim-btn';
+    doneBtn.textContent = '> DONE';
+
+    const cancelBtn = document.createElement('div');
+    cancelBtn.className = 'modal-tui-option trim-btn';
+    cancelBtn.textContent = '  CANCEL';
+
+    const btnRow = document.createElement('div');
+    btnRow.className = 'trim-btn-row';
+    btnRow.appendChild(doneBtn);
+    btnRow.appendChild(cancelBtn);
+    panel.appendChild(btnRow);
+
+    const footerEl = document.createElement('div');
+    footerEl.className = 'trim-header';
+    footerEl.textContent = '\u255A' + '\u2550'.repeat((`\u2554\u2550\u2550 ${slotKey}: TRIM \u2550\u2550\u2557`).length - 2) + '\u255D';
+    panel.appendChild(footerEl);
+
+    trimOverlay.appendChild(panel);
+    document.body.appendChild(trimOverlay);
+
+    let canvasCtx: CanvasRenderingContext2D | null = null;
+    let cssW = 0;
+    let cssH = 0;
+
+    function updateInfo() {
+      const s = (startNorm * dur).toFixed(2);
+      const e = (endNorm * dur).toFixed(2);
+      infoEl.textContent = `  \u25b6 ${s}s \u2015\u2015\u2015 ${e}s \u25c0`;
+    }
+
+    function draw() {
+      if (!canvasCtx || !cssW || !cssH) return;
+      const ctx = canvasCtx;
+      const w = cssW;
+      const h = cssH;
+
+      const style = getComputedStyle(document.documentElement);
+      const lcdBg = style.getPropertyValue('--lcd-bg').trim() || '#1e2d1e';
+      const lcdText = style.getPropertyValue('--lcd-text').trim() || '#7ec87e';
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = lcdBg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw waveform peaks
+      ctx.fillStyle = lcdText;
+      const totalSamples = buf.length;
+      for (let px = 0; px < w; px++) {
+        const s0 = Math.floor((px / w) * totalSamples);
+        const s1 = Math.max(s0 + 1, Math.floor(((px + 1) / w) * totalSamples));
+        let min = 0;
+        let max = 0;
+        for (let c = 0; c < buf.numberOfChannels; c++) {
+          const data = buf.getChannelData(c);
+          for (let i = s0; i < s1; i++) {
+            const v = data[i];
+            if (v < min) min = v;
+            if (v > max) max = v;
+          }
+        }
+        const yTop = ((1 - max) / 2) * h;
+        const yBot = ((1 - min) / 2) * h;
+        ctx.fillRect(px, yTop, 1, Math.max(1, yBot - yTop));
+      }
+
+      // Dim excluded regions
+      ctx.save();
+      ctx.globalAlpha = 0.72;
+      ctx.fillStyle = lcdBg;
+      ctx.fillRect(0, 0, startNorm * w, h);
+      ctx.fillRect(endNorm * w, 0, w - endNorm * w, h);
+      ctx.restore();
+
+      // Handle lines
+      ctx.strokeStyle = lcdText;
+      ctx.lineWidth = 2;
+      const sx = Math.round(startNorm * w);
+      const ex = Math.round(endNorm * w);
+      ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ex, 0); ctx.lineTo(ex, h); ctx.stroke();
+
+      updateInfo();
+    }
+
+    requestAnimationFrame(() => {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      cssW = rect.width;
+      cssH = rect.height;
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+      canvasCtx = canvas.getContext('2d')!;
+      canvasCtx.scale(dpr, dpr);
+      draw();
+    });
+
+    // Preview playback
+    let previewSource: AudioBufferSourceNode | null = null;
+
+    function stopPreview() {
+      if (previewSource) { try { previewSource.stop(); } catch { /* already ended */ } previewSource = null; }
+    }
+
+    function playPreview() {
+      stopPreview();
+      if (!track.gain) return;
+      const ctx = getAudioContext();
+      const source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.connect(track.gain);
+      const offset = startNorm * dur;
+      const trimDur = (endNorm - startNorm) * dur;
+      source.start(ctx.currentTime, offset, trimDur);
+      previewSource = source;
+      source.onended = () => { if (previewSource === source) previewSource = null; };
+    }
+
+    // Drag handles
+    let dragging: 'start' | 'end' | null = null;
+
+    canvas.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const ds = Math.abs(x - startNorm);
+      const de = Math.abs(x - endNorm);
+      dragging = ds <= de ? 'start' : 'end';
+      canvas.setPointerCapture(e.pointerId);
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      if (dragging === 'start') {
+        startNorm = Math.min(x, endNorm - 0.01);
+      } else {
+        endNorm = Math.max(x, startNorm + 0.01);
+      }
+      draw();
+    });
+
+    canvas.addEventListener('pointerup', () => {
+      if (dragging) playPreview();
+      dragging = null;
+    });
+
+    doneBtn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      stopPreview();
+      track.sampleStart = startNorm;
+      track.sampleEnd = endNorm;
+      trimOverlay.remove();
+      onDone();
+    });
+
+    cancelBtn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      stopPreview();
+      trimOverlay.remove();
+      onDone();
+    });
   }
 
   async function startRecord() {

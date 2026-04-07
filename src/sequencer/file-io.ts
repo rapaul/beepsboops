@@ -40,6 +40,7 @@ export async function exportProjectFile(state: SequencerState): Promise<void> {
     activePatternIndex: state.activePatternIndex,
     bpm: state.bpm,
     activeTrackIndex: state.activeTrackIndex,
+    trackSettings: state.tracks.map((t) => ({ sampleStart: t.sampleStart, sampleEnd: t.sampleEnd })),
   };
 
   const customSamples = await loadAllCustomSamples();
