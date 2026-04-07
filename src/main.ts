@@ -1,8 +1,8 @@
 import './style.css';
 
-// Apply colour theme from ?colour= query param
-const theme = new URLSearchParams(location.search).get('colour');
-if (theme) document.documentElement.dataset.theme = theme;
+// Apply colour theme from ?colour= query param (default: white)
+const theme = new URLSearchParams(location.search).get('colour') ?? 'white';
+document.documentElement.dataset.theme = theme;
 
 import { fetchAllSamples, injectRawSample } from './audio/sample-loader';
 import { loadAllCustomSamples } from './audio/sample-store';
