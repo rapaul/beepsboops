@@ -7,7 +7,7 @@ import { updateGrid } from './grid';
 import { updatePatternSelector } from './display';
 import { refreshTrackButtons } from './track-selector';
 
-type CopyMode = 'idle' | 'pattern-from' | 'pattern-to' | 'sample-from' | 'sample-to';
+type CopyMode = 'idle' | 'from' | 'pattern-to' | 'sample-to';
 
 let copyMode: CopyMode = 'idle';
 let copySourceIndex = -1;
@@ -21,7 +21,7 @@ function setCopyMode(mode: CopyMode): void {
   if (mode === 'idle') {
     copyBtnEl.textContent = 'COPY';
     copyBtnEl.classList.remove('mode-active');
-  } else if (mode === 'pattern-from' || mode === 'sample-from') {
+  } else if (mode === 'from') {
     copyBtnEl.textContent = 'FROM';
     copyBtnEl.classList.add('mode-active');
   } else {
@@ -37,13 +37,13 @@ function setCopyMode(mode: CopyMode): void {
 export function handlePatternSelect(index: number): boolean {
   if (copyMode === 'idle') return false;
 
-  // Any click while in sample-copy mode cancels it
-  if (copyMode === 'sample-from' || copyMode === 'sample-to') {
+  // Clicking a pattern button mid-sample-copy cancels
+  if (copyMode === 'sample-to') {
     setCopyMode('idle');
     return true;
   }
 
-  if (copyMode === 'pattern-from') {
+  if (copyMode === 'from') {
     copySourceIndex = index;
     setCopyMode('pattern-to');
     updatePatternSelector(stateRef!);
@@ -85,8 +85,8 @@ export function handlePatternSelect(index: number): boolean {
 export function handleTrackSelect(index: number): boolean {
   if (copyMode === 'idle') return false;
 
-  // Any click while in pattern-copy mode cancels it
-  if (copyMode === 'pattern-from' || copyMode === 'pattern-to') {
+  // Clicking a track button mid-pattern-copy cancels
+  if (copyMode === 'pattern-to') {
     setCopyMode('idle');
     return true;
   }
@@ -97,7 +97,7 @@ export function handleTrackSelect(index: number): boolean {
     return true;
   }
 
-  if (copyMode === 'sample-from') {
+  if (copyMode === 'from') {
     copySourceIndex = index;
     setCopyMode('sample-to');
     return true;
@@ -232,11 +232,7 @@ export function initActionsBar(
       setCopyMode('idle');
       return;
     }
-    if (state.activeTrackIndex >= BUILTIN_COUNT) {
-      setCopyMode('sample-from');
-    } else {
-      setCopyMode('pattern-from');
-    }
+    setCopyMode('from');
   });
 
   const watLink = document.createElement('a');
