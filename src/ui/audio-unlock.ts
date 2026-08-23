@@ -17,15 +17,22 @@ export function initAudioUnlock(container: HTMLElement, onReady?: () => void): v
     </button>
   `;
 
+  let dismissed = false;
   const dismiss = () => {
+    if (dismissed) return;
+    dismissed = true;
     overlay.remove();
     onReady?.();
   };
 
   const unlock = (e: Event) => {
     e.preventDefault();
-    // Kick off the unlock synchronously so we stay inside the gesture callstack.
-    void ensureAudioReady().finally(dismiss);
+    // Everything iOS requires inside the gesture callstack happens in the
+    // synchronous part of ensureAudioReady, so the overlay can go straight
+    // away. Waiting on the promise leaves it up until resume() settles, which
+    // on iOS can stall long enough to look like the first tap did nothing.
+    void ensureAudioReady();
+    dismiss();
   };
 
   overlay.addEventListener('pointerdown', unlock);
@@ -40,6 +47,7 @@ export function initAudioUnlock(container: HTMLElement, onReady?: () => void): v
   // Safety net: if the overlay is somehow bypassed, the first tap anywhere
   // still unlocks audio.
   const fallback = () => {
+    if (!dismissed) return; // the overlay's own handler covers this tap
     if (!isAudioUnlocked()) void ensureAudioReady();
   };
   document.addEventListener('pointerdown', fallback, { capture: true });
