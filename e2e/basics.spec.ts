@@ -1,15 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { gotoApp } from './helpers';
 
 test.describe('page load', () => {
   test('app renders after samples load', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     // The loading div should be replaced by the grid once init() completes
     await expect(page.locator('#grid')).toBeVisible();
     await expect(page.locator('.loading')).toHaveCount(0);
   });
 
   test('title is beepsboops', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page).toHaveTitle('beepsboops');
   });
 });
@@ -24,7 +25,7 @@ test.describe('samples load', () => {
       }
     });
 
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#grid')).toBeVisible();
     expect(failedSamples).toEqual([]);
   });
@@ -32,21 +33,21 @@ test.describe('samples load', () => {
 
 test.describe('sequencer grid', () => {
   test('renders 16 step buttons', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#grid')).toBeVisible();
     const steps = page.locator('.step-btn');
     await expect(steps).toHaveCount(16);
   });
 
   test('renders 16 track buttons (8 built-in + 8 custom)', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#tracks')).toBeVisible();
     const tracks = page.locator('.track-btn');
     await expect(tracks).toHaveCount(16);
   });
 
   test('first track is selected by default', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#tracks')).toBeVisible();
     const firstTrack = page.locator('.track-btn').first();
     await expect(firstTrack).toHaveClass(/track-active/);
@@ -55,7 +56,7 @@ test.describe('sequencer grid', () => {
 
 test.describe('interactivity', () => {
   test('clicking a step toggles it on', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#grid')).toBeVisible();
 
     const step = page.locator('.step-btn').nth(0);
@@ -67,7 +68,7 @@ test.describe('interactivity', () => {
   });
 
   test('clicking a step again toggles it off', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#grid')).toBeVisible();
 
     const step = page.locator('.step-btn').nth(0);
@@ -81,7 +82,7 @@ test.describe('interactivity', () => {
   });
 
   test('switching tracks updates the grid', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#grid')).toBeVisible();
 
     // Activate step 0 on the first track
@@ -100,7 +101,7 @@ test.describe('interactivity', () => {
   });
 
   test('BPM buttons adjust the display', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#transport')).toBeVisible();
 
     const bpmDisplay = page.locator('#bpm-display');
@@ -116,7 +117,7 @@ test.describe('interactivity', () => {
 
 test.describe('playback', () => {
   test('play button toggles text to STOP', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#transport')).toBeVisible();
 
     const playBtn = page.locator('#play-btn');
@@ -128,7 +129,7 @@ test.describe('playback', () => {
   });
 
   test('stop returns button text to PLAY', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#transport')).toBeVisible();
 
     const playBtn = page.locator('#play-btn');
@@ -141,7 +142,7 @@ test.describe('playback', () => {
   });
 
   test('playhead advances steps while playing', async ({ page }) => {
-    await page.goto('/');
+    await gotoApp(page);
     await expect(page.locator('#grid')).toBeVisible();
 
     const playBtn = page.locator('#play-btn');

@@ -849,3 +849,43 @@ html, body {
     font-size: 0.7rem;
   }
 }
+
+/* ── Audio unlock overlay (mobile Safari gesture requirement) ── */
+.audio-unlock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.88);
+  touch-action: manipulation;
+}
+
+.audio-unlock-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 34px;
+  border: 2px solid var(--lcd-text);
+  border-radius: 6px;
+  background: var(--lcd-bg);
+  color: var(--lcd-text);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.audio-unlock-icon {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.audio-unlock-btn:active {
+  background: var(--lcd-text);
+  color: var(--lcd-bg);
+}

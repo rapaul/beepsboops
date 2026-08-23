@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { gotoApp } from './helpers';
 
 test('transport and actions bar alignment', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
-  await page.goto('/');
+  await gotoApp(page);
   await page.waitForSelector('.transport-row');
 
   await page.screenshot({ path: 'test-results/layout-mobile.png', fullPage: false });

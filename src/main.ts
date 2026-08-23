@@ -14,6 +14,7 @@ import { initTrackSelector } from './ui/track-selector';
 import { initTransportUI } from './ui/transport-ui';
 import { initActionsBar } from './ui/actions-bar';
 import { startPlayhead, stopPlayhead, setOnLoop } from './ui/playhead';
+import { initAudioUnlock } from './ui/audio-unlock';
 
 async function init(): Promise<void> {
   // Create sequencer state (no audio yet — deferred to first user gesture)
@@ -73,6 +74,9 @@ async function init(): Promise<void> {
   });
 
   updatePatternSelector(state);
+
+  // Mobile Safari needs an explicit gesture before any audio can play
+  initAudioUnlock(app);
 }
 
 init();
