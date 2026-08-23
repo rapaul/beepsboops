@@ -1,3 +1,5 @@
+import { beginMicSession, endMicSession } from './context';
+
 export interface MicRecording {
   mediaRecorder: MediaRecorder;
   chunks: Blob[];
@@ -5,7 +7,26 @@ export interface MicRecording {
 }
 
 export async function requestMicAccess(): Promise<MediaStream> {
-  return navigator.mediaDevices.getUserMedia({ audio: true });
+  if (!navigator.mediaDevices?.getUserMedia) {
+    // Safari only exposes mediaDevices on a secure origin.
+    throw new Error(
+      window.isSecureContext ? 'Microphone not supported' : 'Microphone needs HTTPS',
+    );
+  }
+  // iOS refuses capture while the playback-only session is active.
+  beginMicSession();
+  try {
+    return await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    endMicSession();
+    throw err;
+  }
+}
+
+/** Release the mic and hand the playback session back. */
+export function releaseMic(stream: MediaStream): void {
+  stream.getTracks().forEach((t) => t.stop());
+  endMicSession();
 }
 
 export function startRecording(stream: MediaStream): MicRecording {
@@ -21,7 +42,7 @@ export function startRecording(stream: MediaStream): MicRecording {
 export function stopRecording(recording: MicRecording): Promise<Blob> {
   return new Promise((resolve) => {
     recording.mediaRecorder.onstop = () => {
-      recording.stream.getTracks().forEach((t) => t.stop());
+      releaseMic(recording.stream);
       resolve(new Blob(recording.chunks, { type: recording.mediaRecorder.mimeType }));
     };
     recording.mediaRecorder.stop();

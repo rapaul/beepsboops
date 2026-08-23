@@ -2,6 +2,7 @@ let audioCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
 let unlocked = false;
 let silentEl: HTMLAudioElement | null = null;
+let silentElWasPlaying = false;
 
 type AudioContextCtor = typeof AudioContext;
 
@@ -15,19 +16,50 @@ function getCtor(): AudioContextCtor {
   return Ctor;
 }
 
+type AudioSessionType = 'playback' | 'play-and-record';
+
 /**
  * iOS 16.4+ exposes an audio session type. The default ("auto") makes a
  * WebAudio-only page behave like an "ambient" sound source, which the hardware
  * ringer switch silences. "playback" opts into media playback, so the page is
  * audible with the switch set to silent — the usual cause of "no sound on
  * Safari mobile" when everything else looks fine.
+ *
+ * "playback" is playback-only, though: getUserMedia is refused while it is
+ * active, so recording has to switch to "play-and-record" first.
  */
-function setPlaybackSession(): void {
+export function setAudioSessionType(type: AudioSessionType): void {
   try {
     const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
-    if (session) session.type = 'playback';
+    if (session) session.type = type;
   } catch {
-    // Not supported — the silent element below is the fallback.
+    // Not supported — the silent element is the fallback.
+  }
+}
+
+function setPlaybackSession(): void {
+  setAudioSessionType('playback');
+}
+
+/**
+ * Claim the mic-capable session before getUserMedia and hold it for as long as
+ * capture runs. iOS routes audio differently under "play-and-record" (quieter,
+ * earpiece on some devices), so endMicSession() puts it back. The silent
+ * element is paused meanwhile: it holds a playback session that competes with
+ * capture.
+ */
+export function beginMicSession(): void {
+  setAudioSessionType('play-and-record');
+  silentElWasPlaying = silentEl !== null && !silentEl.paused;
+  if (silentElWasPlaying) silentEl!.pause();
+}
+
+/** Restore the playback session once capture has stopped. */
+export function endMicSession(): void {
+  setAudioSessionType('playback');
+  if (silentElWasPlaying && silentEl) {
+    silentElWasPlaying = false;
+    void silentEl.play().catch(() => {});
   }
 }
 
@@ -38,8 +70,8 @@ function silentWavUrl(): string {
   const dataBytes = frames * 2;
   const buf = new ArrayBuffer(44 + dataBytes);
   const view = new DataView(buf);
-  const ascii = (offset: number, s: string) => {
-    for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+  const ascii = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
   };
   ascii(0, 'RIFF');
   view.setUint32(4, 36 + dataBytes, true);

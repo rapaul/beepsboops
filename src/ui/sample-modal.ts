@@ -1,6 +1,6 @@
 import { type SequencerState } from '../sequencer/state';
 import { getAudioContext } from '../audio/context';
-import { requestMicAccess, startRecording, stopRecording, blobToArrayBuffer, type MicRecording } from '../audio/mic-recorder';
+import { requestMicAccess, startRecording, stopRecording, blobToArrayBuffer, releaseMic, type MicRecording } from '../audio/mic-recorder';
 import { storeSample, deleteSample } from '../audio/sample-store';
 import { injectRawSample, decodeInjectedSample, clearBuffer } from '../audio/sample-loader';
 import { trimSilence, audioBufferToWav } from '../audio/trim';
@@ -8,6 +8,29 @@ import { trimSilence, audioBufferToWav } from '../audio/trim';
 const MAX_RECORD_S = 10;
 
 let overlay: HTMLElement | null = null;
+
+/**
+ * getUserMedia rejects for several reasons that are not a refused permission
+ * prompt; reporting them all as "denied" sends people to reset a permission
+ * that was never the problem.
+ */
+function micFailureReason(err: unknown): { status: string; message: string } {
+  const name = (err as { name?: string } | null)?.name;
+  switch (name) {
+    case 'NotAllowedError':
+    case 'SecurityError':
+      return { status: 'MIC DENIED', message: 'MIC ACCESS DENIED' };
+    case 'NotFoundError':
+    case 'OverconstrainedError':
+      return { status: 'NO MIC', message: 'NO MICROPHONE FOUND' };
+    case 'NotReadableError':
+      return { status: 'MIC BUSY', message: 'MIC IN USE ELSEWHERE' };
+    default: {
+      const msg = (err as { message?: string } | null)?.message;
+      return { status: 'MIC ERROR', message: (msg || 'MIC UNAVAILABLE').toUpperCase() };
+    }
+  }
+}
 
 export function openSampleModal(
   trackIndex: number,
@@ -287,9 +310,10 @@ export function openSampleModal(
     let stream: MediaStream;
     try {
       stream = await requestMicAccess();
-    } catch {
-      render('STATUS: MIC DENIED', ['CANCEL'], -1);
-      rebindCancel();
+    } catch (err) {
+      const reason = micFailureReason(err);
+      render(`STATUS: ${reason.status}`, ['CANCEL'], -1);
+      rebindCancel(reason.message);
       return;
     }
 
@@ -409,9 +433,9 @@ export function openSampleModal(
     close();
   }
 
-  function rebindCancel() {
+  function rebindCancel(message = 'MIC ACCESS DENIED') {
     box.innerHTML = '';
-    const msg = title + '\n\n  MIC ACCESS DENIED\n\n> CANCEL\n\n' + footer;
+    const msg = title + '\n\n  ' + message + '\n\n> CANCEL\n\n' + footer;
     for (const l of msg.split('\n')) {
       const el = document.createElement('div');
       el.textContent = l;
@@ -425,10 +449,10 @@ export function openSampleModal(
 
   function close() {
     if (recording) {
-      recording.stream.getTracks().forEach((t) => t.stop());
       if (recording.mediaRecorder.state !== 'inactive') {
         recording.mediaRecorder.stop();
       }
+      releaseMic(recording.stream);
       recording = null;
     }
     if (recordTimer) { clearInterval(recordTimer); recordTimer = null; }
