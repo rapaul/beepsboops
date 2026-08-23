@@ -102,11 +102,15 @@ export function initTransportUI(
   const bpmUp = document.getElementById('bpm-up')!;
   const bpmDisplay = document.getElementById('bpm-display')!;
 
-  playBtn.addEventListener('pointerdown', async () => {
-    await togglePlayback(state);
+  playBtn.addEventListener('pointerdown', () => {
+    // play() flips isPlaying synchronously, so the button can respond straight
+    // away. Awaiting it would stall the UI behind the audio unlock and the
+    // first-run sample decode — on iOS resume() can stay pending for seconds.
+    const pending = togglePlayback(state);
     playBtn.textContent = state.isPlaying ? 'STOP' : 'PLAY';
     playBtn.classList.toggle('playing', state.isPlaying);
     onTransportChange();
+    void Promise.resolve(pending).catch(() => {});
   });
 
   patchBtn.addEventListener('pointerdown', () => {

@@ -3,52 +3,24 @@ import { ensureAudioReady, isAudioUnlocked, initAudioResumeWatchers } from '../a
 /**
  * Mobile Safari will not start audio outside a user gesture, and a WebAudio-only
  * page is silenced by the ringer switch until the media session is claimed.
- * A single explicit tap on load handles both.
+ *
+ * Pressing PLAY handles both on its own — its pointerdown handler reaches
+ * ensureAudioReady() synchronously, inside the gesture callstack. But the pitch
+ * keyboard and the sample modal preview sounds through getAudioContext()
+ * directly, so a first tap there would otherwise build a context that was never
+ * unlocked. A capture-phase listener on the document unlocks on whichever
+ * gesture comes first, so no tap-to-enable gate is needed.
  */
-export function initAudioUnlock(container: HTMLElement, onReady?: () => void): void {
+export function initAudioUnlock(): void {
   initAudioResumeWatchers();
 
-  const overlay = document.createElement('div');
-  overlay.className = 'audio-unlock-overlay';
-  overlay.innerHTML = `
-    <button class="audio-unlock-btn" type="button">
-      <span class="audio-unlock-icon">▶</span>
-      <span class="audio-unlock-label">TAP TO ENABLE SOUND</span>
-    </button>
-  `;
-
-  let dismissed = false;
-  const dismiss = () => {
-    if (dismissed) return;
-    dismissed = true;
-    overlay.remove();
-    onReady?.();
-  };
-
-  const unlock = (e: Event) => {
-    e.preventDefault();
-    // Everything iOS requires inside the gesture callstack happens in the
-    // synchronous part of ensureAudioReady, so the overlay can go straight
-    // away. Waiting on the promise leaves it up until resume() settles, which
-    // on iOS can stall long enough to look like the first tap did nothing.
+  const unlock = () => {
+    if (isAudioUnlocked()) return;
+    // Runs before the target's own handler, so audio is live by the time any
+    // UI code reaches for the context.
     void ensureAudioReady();
-    dismiss();
   };
 
-  overlay.addEventListener('pointerdown', unlock);
-  // Keyboard/desktop fallback — pointerdown covers touch and mouse.
-  overlay.querySelector('.audio-unlock-btn')!.addEventListener('keydown', (e) => {
-    const key = (e as KeyboardEvent).key;
-    if (key === 'Enter' || key === ' ') unlock(e);
-  });
-
-  container.appendChild(overlay);
-
-  // Safety net: if the overlay is somehow bypassed, the first tap anywhere
-  // still unlocks audio.
-  const fallback = () => {
-    if (!dismissed) return; // the overlay's own handler covers this tap
-    if (!isAudioUnlocked()) void ensureAudioReady();
-  };
-  document.addEventListener('pointerdown', fallback, { capture: true });
+  document.addEventListener('pointerdown', unlock, { capture: true });
+  document.addEventListener('keydown', unlock, { capture: true });
 }

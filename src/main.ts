@@ -75,8 +75,8 @@ async function init(): Promise<void> {
 
   updatePatternSelector(state);
 
-  // Mobile Safari needs an explicit gesture before any audio can play
-  initAudioUnlock(app);
+  // Mobile Safari needs a user gesture before any audio can play
+  initAudioUnlock();
 }
 
 init();
