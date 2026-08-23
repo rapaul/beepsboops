@@ -3,8 +3,14 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm install -g pnpm
-        - pnpm install
+        # pnpm 11 matches the lockfile format; pin the major so a future
+        # release can't silently change resolution.
+        - npm install -g pnpm@11
+        # A restored cache can leave a dereferenced node_modules that pnpm
+        # reports as "Already up to date" while it is actually broken, so
+        # always start from a clean tree. The store cache below keeps this fast.
+        - rm -rf node_modules
+        - pnpm install --frozen-lockfile --store-dir pnpm-store
     build:
       commands:
         - pnpm build
@@ -14,4 +20,9 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      # Cache the pnpm content-addressable store, never node_modules: pnpm
+      # builds node_modules out of symlinks into node_modules/.pnpm, and the
+      # cache restore dereferences them. That flattens vite into a real
+      # directory whose dependencies (rolldown) live only under .pnpm, so the
+      # build dies with ERR_MODULE_NOT_FOUND.
+      - pnpm-store/**/*
